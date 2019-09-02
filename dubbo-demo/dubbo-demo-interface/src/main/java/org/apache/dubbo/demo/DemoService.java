@@ -16,6 +16,9 @@
  */
 package org.apache.dubbo.demo;
 
+/**
+ * 测试服务
+ */
 public interface DemoService {
 
     String sayHello(String name);
