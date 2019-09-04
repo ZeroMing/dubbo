@@ -75,10 +75,14 @@ public class ExtensionLoader<T> {
 
     /**
      * 扩展加载器集合
+     * key: 类
+     * value: 扩展加载器
      */
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
     /**
      * 扩展实现类集合
+     * key: 扩展接口
+     * value: 扩展实例对象
      */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
@@ -90,7 +94,7 @@ public class ExtensionLoader<T> {
     private final Class<?> type;
 
     /**
-     * 扩展工厂
+     * 扩展构造工厂
      * 用于调用 {@link #injectExtension(Object)} 方法，向拓展对象注入依赖属性。
      */
     private final ExtensionFactory objectFactory;
@@ -100,6 +104,8 @@ public class ExtensionLoader<T> {
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
     /**
      * 缓存的拓展实现类集合。
+     * key: SPI文件中的key
+     * value: 扩展实现类全路径名
      */
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
     /**
@@ -108,6 +114,8 @@ public class ExtensionLoader<T> {
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
     /**
      * 缓存的拓展对象集合
+     * key: SPI定义文件中的key
+     * value：扩展对象
      */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
     /**
@@ -140,6 +148,7 @@ public class ExtensionLoader<T> {
 
     private ExtensionLoader(Class<?> type) {
         this.type = type;
+        // 创建 扩展构造工厂。获取构造工厂
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 
@@ -149,11 +158,14 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        if (type == null)
+        // 参数判断
+        if (type == null) {
             throw new IllegalArgumentException("Extension type == null");
+        }
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Extension type(" + type + ") is not interface!");
         }
+        // 判断该接口是否有@SPI注解
         if (!withExtensionAnnotation(type)) {
             throw new IllegalArgumentException("Extension type(" + type +
                     ") is not extension, because WITHOUT @" + SPI.class.getSimpleName() + " Annotation!");
@@ -161,6 +173,7 @@ public class ExtensionLoader<T> {
 
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (loader == null) {
+            // new 一个新的扩展加载器放进集合中并且返回
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
             loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         }
@@ -336,21 +349,30 @@ public class ExtensionLoader<T> {
      */
     @SuppressWarnings("unchecked")
     public T getExtension(String name) {
-        if (name == null || name.length() == 0)
+        if (name == null || name.length() == 0){
             throw new IllegalArgumentException("Extension name == null");
+        }
+        // 传递的值为true
         if ("true".equals(name)) {
             return getDefaultExtension();
         }
+        // Holder，顾名思义，用于持有目标对象
         Holder<Object> holder = cachedInstances.get(name);
         if (holder == null) {
             cachedInstances.putIfAbsent(name, new Holder<Object>());
             holder = cachedInstances.get(name);
         }
+        // 扩展对象
         Object instance = holder.get();
         if (instance == null) {
+            // 线程安全，防止多线程创建
+            // 双重检查
             synchronized (holder) {
+                // 加锁的过程中可能其他的线程会进行实例化
                 instance = holder.get();
+                // 双重判断
                 if (instance == null) {
+                    // 创建扩展对象
                     instance = createExtension(name);
                     holder.set(instance);
                 }
@@ -529,19 +551,26 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
+        // 获取扩展实现类
         Class<?> clazz = getExtensionClasses().get(name);
         if (clazz == null) {
             throw findException(name);
         }
         try {
+            //
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            // 依赖注入获取，Setter注入
             injectExtension(instance);
+
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
+            // 带参数构造方法的 扩展对象实例
             if (wrapperClasses != null && !wrapperClasses.isEmpty()) {
+                // 将当前 instance 作为参数传给 Wrapper 的构造方法，并通过反射创建 Wrapper 实例。
+                // 然后向 Wrapper 实例中注入依赖，最后将 Wrapper 实例再次赋值给 instance 变量
                 for (Class<?> wrapperClass : wrapperClasses) {
                     instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                 }
@@ -557,6 +586,7 @@ public class ExtensionLoader<T> {
         try {
             if (objectFactory != null) {
                 for (Method method : instance.getClass().getMethods()) {
+                    // setter 注入
                     if (method.getName().startsWith("set")
                             && method.getParameterTypes().length == 1
                             && Modifier.isPublic(method.getModifiers())) {
@@ -603,6 +633,7 @@ public class ExtensionLoader<T> {
             synchronized (cachedClasses) {
                 classes = cachedClasses.get();
                 if (classes == null) {
+                    // 加载所有的扩展类
                     classes = loadExtensionClasses();
                     cachedClasses.set(classes);
                 }
@@ -613,6 +644,7 @@ public class ExtensionLoader<T> {
 
     // synchronized in getExtensionClasses
     private Map<String, Class<?>> loadExtensionClasses() {
+        // SPI 注解
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation != null) {
             String value = defaultAnnotation.value();
@@ -627,8 +659,11 @@ public class ExtensionLoader<T> {
         }
 
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
+        // 加载 META-INF/dubbo/internal
         loadDirectory(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
+        // 加载 META-INF/dubbo/
         loadDirectory(extensionClasses, DUBBO_DIRECTORY);
+        // 加载 META-INF/services/
         loadDirectory(extensionClasses, SERVICES_DIRECTORY);
         return extensionClasses;
     }
@@ -646,6 +681,7 @@ public class ExtensionLoader<T> {
             if (urls != null) {
                 while (urls.hasMoreElements()) {
                     java.net.URL resourceURL = urls.nextElement();
+                    // 加载资源
                     loadResource(extensionClasses, classLoader, resourceURL);
                 }
             }
@@ -690,12 +726,14 @@ public class ExtensionLoader<T> {
         }
     }
 
+
     private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name) throws NoSuchMethodException {
         if (!type.isAssignableFrom(clazz)) {
             throw new IllegalStateException("Error when load extension class(interface: " +
                     type + ", class line: " + clazz.getName() + "), class "
                     + clazz.getName() + "is not subtype of interface.");
         }
+        // Adaptive 注解
         if (clazz.isAnnotationPresent(Adaptive.class)) {
             if (cachedAdaptiveClass == null) {
                 cachedAdaptiveClass = clazz;
@@ -719,8 +757,10 @@ public class ExtensionLoader<T> {
                     throw new IllegalStateException("No such extension name for the class " + clazz.getName() + " in the config " + resourceURL);
                 }
             }
+            // 逗号分隔
             String[] names = NAME_SEPARATOR.split(name);
             if (names != null && names.length > 0) {
+                // 是否有 Activate 注解
                 Activate activate = clazz.getAnnotation(Activate.class);
                 if (activate != null) {
                     cachedActivates.put(names[0], activate);
