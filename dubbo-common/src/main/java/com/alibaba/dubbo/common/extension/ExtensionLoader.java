@@ -60,6 +60,7 @@ public class ExtensionLoader<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
 
+
     private static final String SERVICES_DIRECTORY = "META-INF/services/";
 
     private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";
@@ -68,29 +69,73 @@ public class ExtensionLoader<T> {
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
 
-    private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
+
+    // =================================
+
+    /**
+     * 扩展加载器集合
+     */
+    private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
+    /**
+     * 扩展实现类集合
+     */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
     // ==============================
 
+    /**
+     * 扩展接口
+     */
     private final Class<?> type;
 
+    /**
+     * 扩展工厂
+     * 用于调用 {@link #injectExtension(Object)} 方法，向拓展对象注入依赖属性。
+     */
     private final ExtensionFactory objectFactory;
-
+    /**
+     * 缓存的拓展名与拓展类的映射。
+     */
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
-
+    /**
+     * 缓存的拓展实现类集合。
+     */
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
-
+    /**
+     * 拓展名与 @Activate 的映射
+     */
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
+    /**
+     * 缓存的拓展对象集合
+     */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
+    /**
+     * 缓存的自适应( Adaptive )拓展对象
+     */
     private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();
+    /**
+     * 缓存的自适应拓展对象的类
+     */
     private volatile Class<?> cachedAdaptiveClass = null;
+    /**
+     * 缓存的默认拓展名
+     */
     private String cachedDefaultName;
+    /**
+     * 创建 {@link #cachedAdaptiveInstance} 时发生的异常。
+     */
     private volatile Throwable createAdaptiveInstanceError;
-
+    /**
+     * 拓展 Wrapper 实现类集合
+     * 带唯一参数为拓展接口的构造方法的实现类
+     *
+     */
     private Set<Class<?>> cachedWrapperClasses;
-
+    /**
+     * 拓展名 与 加载对应拓展类发生的异常 的 映射
+     *
+     */
     private Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<String, IllegalStateException>();
 
     private ExtensionLoader(Class<?> type) {
