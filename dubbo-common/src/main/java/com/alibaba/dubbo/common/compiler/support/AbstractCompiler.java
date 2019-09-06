@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 /**
  * Abstract compiler. (SPI, Prototype, ThreadSafe)
+ * 线程安全
  */
 public abstract class AbstractCompiler implements Compiler {
 
@@ -56,6 +57,7 @@ public abstract class AbstractCompiler implements Compiler {
                 throw new IllegalStateException("The java code not endsWith \"}\", code: \n" + code + "\n");
             }
             try {
+                // 子类去实现
                 return doCompile(className, code);
             } catch (RuntimeException t) {
                 throw t;

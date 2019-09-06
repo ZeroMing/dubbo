@@ -20,5 +20,8 @@ public class DubboSPITest {
         Robot bumblebee = extensionLoader.getExtension("bumblebee");
         bumblebee.sayHello();
 
+        // 获得自适应拓展对象
+        Robot adaptiveExtension = extensionLoader.getAdaptiveExtension();
+        adaptiveExtension.sayHello();
     }
 }
