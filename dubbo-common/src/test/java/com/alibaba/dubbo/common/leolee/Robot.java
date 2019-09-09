@@ -1,5 +1,7 @@
 package com.alibaba.dubbo.common.leolee;
 
+import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.common.extension.Adaptive;
 import com.alibaba.dubbo.common.extension.SPI;
 
 /**
@@ -10,4 +12,6 @@ import com.alibaba.dubbo.common.extension.SPI;
 @SPI
 public interface Robot {
     void sayHello();
+    @Adaptive
+    void sayAdaptive(URL url, String brand, long weight);
 }
