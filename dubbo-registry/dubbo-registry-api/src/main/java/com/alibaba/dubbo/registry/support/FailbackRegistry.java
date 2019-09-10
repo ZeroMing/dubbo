@@ -42,10 +42,14 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class FailbackRegistry extends AbstractRegistry {
 
-    // Scheduled executor service
+    /**
+     * Scheduled executor service
+     */
     private final ScheduledExecutorService retryExecutor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("DubboRegistryFailedRetryTimer", true));
 
-    // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
+    /**
+     * Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
+     */
     private final ScheduledFuture<?> retryFuture;
 
     private final Set<URL> failedRegistered = new ConcurrentHashSet<URL>();
@@ -134,6 +138,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedUnregistered.remove(url);
         try {
             // Sending a registration request to the server side
+            // 调用子类方法
             doRegister(url);
         } catch (Exception e) {
             Throwable t = e;

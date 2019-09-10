@@ -97,22 +97,35 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return service;
     }
 
+    /**
+     * >>>>> 监控上下文刷新
+     * 服务发布入口
+     * @param event
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        // 非延迟加载 && 未被导出状态 && 可导出状态
         if (isDelay() && !isExported() && !isUnexported()) {
             if (logger.isInfoEnabled()) {
                 logger.info("The service ready on spring started. service: " + getInterface());
             }
+            // 导出服务
             export();
         }
     }
 
+    /**
+     * 是否延迟加载
+     * @return
+     */
     private boolean isDelay() {
         Integer delay = getDelay();
+        // 服务提供者的配置
         ProviderConfig provider = getProvider();
         if (delay == null && provider != null) {
             delay = provider.getDelay();
         }
+        // 必须支持上下文监听
         return supportedApplicationListener && (delay == null || delay == -1);
     }
 
@@ -265,6 +278,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     public void export() {
         super.export();
         // Publish ServiceBeanExportedEvent
+        // 发布服务被导出事件
         publishExportEvent();
     }
 

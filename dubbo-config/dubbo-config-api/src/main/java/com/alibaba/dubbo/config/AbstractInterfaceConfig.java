@@ -58,7 +58,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     // local stub class name for the service interface
     protected String stub;
 
-    // service monitor
+    // service monitor 监测配置
     protected MonitorConfig monitor;
 
     // proxy type
@@ -83,13 +83,13 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     // layer
     protected String layer;
 
-    // application info
+    // application info 上下文配置
     protected ApplicationConfig application;
 
-    // module info
+    // module info 模块配置
     protected ModuleConfig module;
 
-    // registry centers
+    // registry centers 注册中心配置
     protected List<RegistryConfig> registries;
 
     // connection events
@@ -107,7 +107,9 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     protected void checkRegistry() {
         // for backward compatibility
         if (registries == null || registries.isEmpty()) {
+            // 获取注册中心地址
             String address = ConfigUtils.getProperty("dubbo.registry.address");
+            // 拼接为注册中心地址集合，有可能是集群地址
             if (address != null && address.length() > 0) {
                 registries = new ArrayList<RegistryConfig>();
                 String[] as = address.split("\\s*[|]+\\s*");
@@ -118,6 +120,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 }
             }
         }
+        // 如果注册中地址配置为空,抛出异常
         if ((registries == null || registries.isEmpty())) {
             throw new IllegalStateException((getClass().getSimpleName().startsWith("Reference")
                     ? "No such any registry to refer service in consumer "
@@ -127,6 +130,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     + Version.getVersion()
                     + ", Please add <dubbo:registry address=\"...\" /> to your spring config. If you want unregister, please set <dubbo:service registry=\"N/A\" />");
         }
+        // 注册中心配置
         for (RegistryConfig registryConfig : registries) {
             appendProperties(registryConfig);
         }
@@ -158,10 +162,18 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
     }
 
+    /**
+     * 加载注册中心链接
+     * @param provider
+     * @return
+     */
     protected List<URL> loadRegistries(boolean provider) {
+        // 检测是否存在注册中心配置类，不存在则抛出异常
         checkRegistry();
+        // 加载所有的URL链接
         List<URL> registryList = new ArrayList<URL>();
         if (registries != null && !registries.isEmpty()) {
+            // 注册配置集合
             for (RegistryConfig config : registries) {
                 String address = config.getAddress();
                 if (address == null || address.length() == 0) {

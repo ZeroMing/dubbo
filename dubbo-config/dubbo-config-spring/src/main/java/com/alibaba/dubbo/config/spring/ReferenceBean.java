@@ -39,6 +39,7 @@ import java.util.Map;
 
 /**
  * ReferenceFactoryBean
+ * 引用工厂Bean对象
  *
  * @export
  */
@@ -81,6 +82,7 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
     @Override
     @SuppressWarnings({"unchecked"})
     public void afterPropertiesSet() throws Exception {
+        // 获取消费者配置信息
         if (getConsumer() == null) {
             Map<String, ConsumerConfig> consumerConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ConsumerConfig.class, false, false);
             if (consumerConfigMap != null && consumerConfigMap.size() > 0) {
@@ -90,16 +92,19 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
                         if (consumerConfig != null) {
                             throw new IllegalStateException("Duplicate consumer configs: " + consumerConfig + " and " + config);
                         }
+                        // 只能存在一个配置，出现多个就会报错
                         consumerConfig = config;
                     }
                 }
+                // 消费者配置
                 if (consumerConfig != null) {
                     setConsumer(consumerConfig);
                 }
             }
         }
-        if (getApplication() == null
-                && (getConsumer() == null || getConsumer().getApplication() == null)) {
+        // 获取应用配置信息
+        if (getApplication() == null && (getConsumer() == null || getConsumer().getApplication() == null)) {
+
             Map<String, ApplicationConfig> applicationConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ApplicationConfig.class, false, false);
             if (applicationConfigMap != null && applicationConfigMap.size() > 0) {
                 ApplicationConfig applicationConfig = null;
@@ -116,6 +121,7 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
                 }
             }
         }
+        // 获取模块配置信息
         if (getModule() == null
                 && (getConsumer() == null || getConsumer().getModule() == null)) {
             Map<String, ModuleConfig> moduleConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ModuleConfig.class, false, false);
@@ -134,6 +140,7 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
                 }
             }
         }
+        // 获取注册配置信息
         if ((getRegistries() == null || getRegistries().isEmpty())
                 && (getConsumer() == null || getConsumer().getRegistries() == null || getConsumer().getRegistries().isEmpty())
                 && (getApplication() == null || getApplication().getRegistries() == null || getApplication().getRegistries().isEmpty())) {
@@ -150,6 +157,7 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
                 }
             }
         }
+        // 获取监控配置信息
         if (getMonitor() == null
                 && (getConsumer() == null || getConsumer().getMonitor() == null)
                 && (getApplication() == null || getApplication().getMonitor() == null)) {
@@ -169,10 +177,13 @@ public class ReferenceBean<T> extends ReferenceConfig<T> implements FactoryBean,
                 }
             }
         }
+
+        // 判断 配置 <dubbo:reference> 的 init 属性开启
         Boolean b = isInit();
         if (b == null && getConsumer() != null) {
             b = getConsumer().isInit();
         }
+        // init 初始化为 true
         if (b != null && b.booleanValue()) {
             getObject();
         }

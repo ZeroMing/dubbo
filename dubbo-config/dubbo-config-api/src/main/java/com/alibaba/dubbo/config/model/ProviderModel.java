@@ -26,8 +26,17 @@ import java.util.List;
 import java.util.Map;
 
 public class ProviderModel {
+    /**
+     * 服务名
+     */
     private final String serviceName;
+    /**
+     * 服务实例
+     */
     private final Object serviceInstance;
+    /**
+     *  服务元数据
+     */
     private final ServiceConfig metadata;
     private final Map<String, List<ProviderMethodModel>> methods = new HashMap<String, List<ProviderMethodModel>>();
 

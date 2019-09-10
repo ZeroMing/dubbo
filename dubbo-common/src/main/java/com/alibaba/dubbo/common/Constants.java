@@ -90,7 +90,9 @@ public class Constants {
     public static final String DEFAULT_EXCHANGER = "header";
 
     public static final String DEFAULT_TRANSPORTER = "netty";
-
+    /**
+     * 默认的通信框架为Netty
+     */
     public static final String DEFAULT_REMOTING_SERVER = "netty";
 
     public static final String DEFAULT_REMOTING_CLIENT = "netty";
@@ -568,7 +570,9 @@ public class Constants {
      * When this attribute appears in invocation's attachment, mock invoker will be used
      */
     public static final String INVOCATION_NEED_MOCK = "invocation.need.mock";
-
+    /**
+     * 本地JVM调用
+     */
     public static final String LOCAL_PROTOCOL = "injvm";
 
     public static final String AUTO_ATTACH_INVOCATIONID_KEY = "invocationid.autoattach";
