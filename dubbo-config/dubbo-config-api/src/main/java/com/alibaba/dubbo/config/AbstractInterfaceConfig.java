@@ -172,6 +172,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         checkRegistry();
         // 加载所有的URL链接
         List<URL> registryList = new ArrayList<URL>();
+        // <dubbo:registry address="zookeeper://127.0.0.1:2181" id="com.alibaba.dubbo.config.RegistryConfig" />
         if (registries != null && !registries.isEmpty()) {
             // 注册配置集合
             for (RegistryConfig config : registries) {

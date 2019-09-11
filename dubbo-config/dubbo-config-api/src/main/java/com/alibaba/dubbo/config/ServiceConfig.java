@@ -221,7 +221,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 }
             }, delay, TimeUnit.MILLISECONDS);
         } else {
-            // 导出
+            // 导出服务
             doExport();
         }
     }
@@ -286,7 +286,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         // ref 非 GenericService 类型
         else {
             try {
-
+                // 获取该全路径类名对应的类。通过当前线程的上下文类加载器加载
                 interfaceClass = Class.forName(interfaceName, true, Thread.currentThread()
                         .getContextClassLoader());
             } catch (ClassNotFoundException e) {
@@ -569,8 +569,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         if (StringUtils.isNotEmpty(proxy)) {
                             registryURL = registryURL.addParameter(Constants.PROXY_KEY, proxy);
                         }
-                        // 生成就Invoker。
+                        // >>>>> 生成就Invoker。
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+                        // 包装调用器
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         // 协议导出
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
