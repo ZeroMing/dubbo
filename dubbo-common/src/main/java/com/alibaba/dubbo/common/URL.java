@@ -259,6 +259,7 @@ public final class URL implements Serializable {
             return "";
         }
         try {
+            // 解码
             return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage(), e);

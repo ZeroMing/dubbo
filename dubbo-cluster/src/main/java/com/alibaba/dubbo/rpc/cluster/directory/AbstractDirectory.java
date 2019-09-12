@@ -35,7 +35,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
+ * Abstract implementation of Directory:
+ * Invoker list returned from this Directory's list method have been filtered by Routers
+ * 服务目录的抽象实现。
+ * 从服务目录返回的调用者集合已经被路由进行了过滤。
  *
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
@@ -46,9 +49,13 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
     private final URL url;
 
     private volatile boolean destroyed = false;
-
+    /**
+     * 消费者路径
+     */
     private volatile URL consumerUrl;
-
+    /**
+     * 路由集合
+     */
     private volatile List<Router> routers;
 
     public AbstractDirectory(URL url) {
@@ -72,12 +79,16 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         if (destroyed) {
             throw new RpcException("Directory already destroyed .url: " + getUrl());
         }
+        // 真正由子类去实现
         List<Invoker<T>> invokers = doList(invocation);
-        List<Router> localRouters = this.routers; // local reference
+        // local reference
+        List<Router> localRouters = this.routers;
         if (localRouters != null && !localRouters.isEmpty()) {
+            // 循环
             for (Router router : localRouters) {
                 try {
                     if (router.getUrl() == null || router.getUrl().getParameter(Constants.RUNTIME_KEY, false)) {
+                        // 进行路由匹配。过滤。黑白名单过滤
                         invokers = router.route(invokers, getConsumerUrl(), invocation);
                     }
                 } catch (Throwable t) {
@@ -129,7 +140,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
     public void destroy() {
         destroyed = true;
     }
-
+    // 真正调用列举逻辑
     protected abstract List<Invoker<T>> doList(Invocation invocation) throws RpcException;
 
 }

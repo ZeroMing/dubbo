@@ -388,14 +388,18 @@ public class UrlUtils {
     }
 
     public static boolean isMatchGlobPattern(String pattern, String value) {
-        if ("*".equals(pattern))
+        // * 表示匹配所有
+        if ("*".equals(pattern)) {
             return true;
+        }
         if ((pattern == null || pattern.length() == 0)
-                && (value == null || value.length() == 0))
+                && (value == null || value.length() == 0)) {
             return true;
+        }
         if ((pattern == null || pattern.length() == 0)
-                || (value == null || value.length() == 0))
+                || (value == null || value.length() == 0)) {
             return false;
+        }
 
         int i = pattern.lastIndexOf('*');
         // doesn't find "*"
