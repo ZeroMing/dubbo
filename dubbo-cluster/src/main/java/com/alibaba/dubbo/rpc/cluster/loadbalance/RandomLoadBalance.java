@@ -25,6 +25,7 @@ import java.util.Random;
 
 /**
  * random load balance.
+ * 随机负载
  *
  */
 public class RandomLoadBalance extends AbstractLoadBalance {
@@ -35,12 +36,16 @@ public class RandomLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
-        int length = invokers.size(); // Number of invokers
-        int totalWeight = 0; // The sum of weights
-        boolean sameWeight = true; // Every invoker has the same weight?
+        // Number of invokers
+        int length = invokers.size();
+        // The sum of weights
+        int totalWeight = 0;
+        // Every invoker has the same weight?
+        boolean sameWeight = true;
         for (int i = 0; i < length; i++) {
             int weight = getWeight(invokers.get(i), invocation);
-            totalWeight += weight; // Sum
+            // Sum
+            totalWeight += weight;
             if (sameWeight && i > 0
                     && weight != getWeight(invokers.get(i - 1), invocation)) {
                 sameWeight = false;

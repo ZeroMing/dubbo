@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * ConsistentHashLoadBalance
- *
+ * 一致性哈希负载
  */
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 

@@ -163,9 +163,11 @@ public class ExtensionLoader<T> {
         if (type == null) {
             throw new IllegalArgumentException("Extension type == null");
         }
+        // 判断是否为接口
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Extension type(" + type + ") is not interface!");
         }
+
         // 判断该接口是否有@SPI注解
         if (!withExtensionAnnotation(type)) {
             throw new IllegalArgumentException("Extension type(" + type +
@@ -510,12 +512,14 @@ public class ExtensionLoader<T> {
     public T getAdaptiveExtension() {
         // 从缓存里取，没有就创建，保证线程安全。
         Object instance = cachedAdaptiveInstance.get();
+        // 判断是否为空
         if (instance == null) {
             if (createAdaptiveInstanceError == null) {
                 // 显示锁
                 synchronized (cachedAdaptiveInstance) {
                     // 双重判断
                     instance = cachedAdaptiveInstance.get();
+                    // 判断是否为空
                     if (instance == null) {
                         try {
                             // 创建自使用扩展对象
@@ -593,25 +597,35 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 依赖注入
+     * @param instance
+     * @return
+     */
     private T injectExtension(T instance) {
         try {
             if (objectFactory != null) {
                 for (Method method : instance.getClass().getMethods()) {
-                    // setter 注入
+                    // setter方法注入
                     if (method.getName().startsWith("set")
                             && method.getParameterTypes().length == 1
                             && Modifier.isPublic(method.getModifiers())) {
                         /**
                          * Check {@link DisableInject} to see if we need auto injection for this property
+                         * 检查是否需要自动化注入
                          */
                         if (method.getAnnotation(DisableInject.class) != null) {
                             continue;
                         }
+                        // 获取方法的第一个参数
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
+                            // 获取参数的属性名
                             String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
+                            // 获取扩展点
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
+                                // 注入对象
                                 method.invoke(instance, object);
                             }
                         } catch (Exception e) {
@@ -674,11 +688,11 @@ public class ExtensionLoader<T> {
         }
 
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
-        // 加载 META-INF/dubbo/internal
+        // 加载 META-INF/dubbo/internal 下的文件
         loadDirectory(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
-        // 加载 META-INF/dubbo/
+        // 加载 META-INF/dubbo/ 下的文件
         loadDirectory(extensionClasses, DUBBO_DIRECTORY);
-        // 加载 META-INF/services/
+        // 加载 META-INF/services/ 下的文件
         loadDirectory(extensionClasses, SERVICES_DIRECTORY);
         return extensionClasses;
     }
@@ -749,7 +763,7 @@ public class ExtensionLoader<T> {
                     type + ", class line: " + clazz.getName() + "), class "
                     + clazz.getName() + "is not subtype of interface.");
         }
-        // Adaptive 注解
+        // @Adaptive 注解，如果配置在类级别上，表示使用的是当前类作为自适应类。
         if (clazz.isAnnotationPresent(Adaptive.class)) {
             if (cachedAdaptiveClass == null) {
                 cachedAdaptiveClass = clazz;
@@ -758,7 +772,10 @@ public class ExtensionLoader<T> {
                         + cachedAdaptiveClass.getClass().getName()
                         + ", " + clazz.getClass().getName());
             }
-        } else if (isWrapperClass(clazz)) {
+        }
+        // 装饰类
+        else if (isWrapperClass(clazz)) {
+            // 进行包装
             Set<Class<?>> wrappers = cachedWrapperClasses;
             if (wrappers == null) {
                 cachedWrapperClasses = new ConcurrentHashSet<Class<?>>();
@@ -766,6 +783,7 @@ public class ExtensionLoader<T> {
             }
             wrappers.add(clazz);
         } else {
+
             clazz.getConstructor();
             if (name == null || name.length() == 0) {
                 name = findAnnotationName(clazz);

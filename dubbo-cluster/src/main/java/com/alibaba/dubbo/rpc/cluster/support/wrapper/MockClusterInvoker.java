@@ -82,6 +82,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
         } else {
             //fail-mock
             try {
+
                 result = this.invoker.invoke(invocation);
             } catch (RpcException e) {
                 if (e.isBiz()) {
@@ -90,6 +91,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                     if (logger.isWarnEnabled()) {
                         logger.warn("fail-mock: " + invocation.getMethodName() + " fail-mock enabled , url : " + directory.getUrl(), e);
                     }
+                    // 失败服务降级
                     result = doMockInvoke(invocation, e);
                 }
             }
