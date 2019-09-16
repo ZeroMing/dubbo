@@ -619,9 +619,10 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     /**
      * Register & bind IP address for service provider, can be configured separately.
-     * Configuration priority: environment variables -> java system properties -> host property in config file ->
-     * /etc/hosts -> default network address -> first available network address
-     *
+     * Configuration priority:
+     * environment variables -> java system properties -> host property in config file
+     * -> /etc/hosts -> default network address -> first available network address
+     * 查找配置的host地址。主机绑定。
      * @param protocolConfig
      * @param registryURLs
      * @param map

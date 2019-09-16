@@ -163,9 +163,11 @@ public class ExtensionLoader<T> {
         if (type == null) {
             throw new IllegalArgumentException("Extension type == null");
         }
+        // 判断是否为接口
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Extension type(" + type + ") is not interface!");
         }
+
         // 判断该接口是否有@SPI注解
         if (!withExtensionAnnotation(type)) {
             throw new IllegalArgumentException("Extension type(" + type +
@@ -610,7 +612,6 @@ public class ExtensionLoader<T> {
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
                             String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
-                            // []
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
                                 method.invoke(instance, object);
@@ -832,7 +833,6 @@ public class ExtensionLoader<T> {
     private Class<?> getAdaptiveExtensionClass() {
         // 获取扩展类信息
         getExtensionClasses();
-        // 如果自适应扩展点类已经存在，那么直接返回即可。@Adaptive注解在类上
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }

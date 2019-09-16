@@ -15,8 +15,10 @@ public class Robot$Adaptive implements com.alibaba.dubbo.common.leolee.Robot {
         if (extName == null) {
             throw new IllegalStateException("Fail to get extension(com.alibaba.dubbo.common.leolee.Robot) name from url(" + url.toString() + ") use keys([robot])");
         }
+        // 获取指定名称的扩展点
         com.alibaba.dubbo.common.leolee.Robot extension =
                 (com.alibaba.dubbo.common.leolee.Robot) ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.leolee.Robot.class).getExtension(extName);
+        // 调用
         extension.sayAdaptive(arg0, arg1, arg2);
     }
 

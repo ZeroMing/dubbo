@@ -520,7 +520,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     private Map<String, List<Invoker<T>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
         // 方法名 -> Invoker列表
         Map<String, List<Invoker<T>>> newMethodInvokerMap = new HashMap<String, List<Invoker<T>>>();
-        // According to the methods classification declared by the provider URL, the methods is compatible with the registry to execute the filtered methods
+        // According to the methods classification declared by the provider URL,
+        // the methods is compatible with the registry to execute the filtered methods
         List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
         if (invokersMap != null && invokersMap.size() > 0) {
             for (Invoker<T> invoker : invokersMap.values()) {

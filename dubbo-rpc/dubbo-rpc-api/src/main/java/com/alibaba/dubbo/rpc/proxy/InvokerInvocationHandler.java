@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 
 /**
  * InvokerHandler
+ * Dubbo实际调用的代理对象
  */
 public class InvokerInvocationHandler implements InvocationHandler {
 
@@ -49,6 +50,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         if ("equals".equals(methodName) && parameterTypes.length == 1) {
             return invoker.equals(args[0]);
         }
+        // 回调对象
         return invoker.invoke(new RpcInvocation(method, args)).recreate();
     }
 
