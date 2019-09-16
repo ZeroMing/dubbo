@@ -158,6 +158,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             }
 
             // Record a failed registration request to a failed list, retry regularly
+            //  记录失败的注册请求，定时任务执行重试
             failedRegistered.add(url);
         }
     }

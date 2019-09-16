@@ -12,7 +12,7 @@ Enhancement / New feature：
 
 Bugfixes:
 
-- `@Reference` field can't refer its' `@Service` Bean in same JVM from v2.6.6 [#3695](https://github.com/apache/dubbo/issues/3695) 
+- `@Reference` field can't refer its' `@` Bean in same JVM from v2.6.6 [#3695](https://github.com/apache/dubbo/issues/3695) 
 -  Nacos Dubbo Registry can't sense the change of service instances [#4348](https://github.com/apache/dubbo/issues/4348)
 - Dubbo throws IoException with error message while decoding fail [#4396](https://github.com/apache/dubbo/pull/4396)
 

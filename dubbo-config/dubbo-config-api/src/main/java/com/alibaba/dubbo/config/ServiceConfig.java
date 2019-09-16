@@ -214,6 +214,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
 
         if (delay != null && delay > 0) {
+            // 延迟休眠几秒
             delayExportExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
@@ -525,7 +526,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
         String host = this.findConfigedHosts(protocolConfig, registryURLs, map);
         Integer port = this.findConfigedPorts(protocolConfig, name, map);
-        // >>>>> 拼接URL
+        // >>>>> 拼接URL。将Map对象传进去
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
 
         if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
@@ -574,6 +575,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         // 包装调用器
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         // 协议导出
+                        // protocol 自适应扩展点
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
                         exporters.add(exporter);
                     }

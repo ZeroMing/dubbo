@@ -39,6 +39,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
         for (String name : loader.getSupportedExtensions()) {
             list.add(loader.getExtension(name));
         }
+        // 包含了所有的Dubbo支持的ExtensionFactory类
         factories = Collections.unmodifiableList(list);
     }
 
@@ -46,6 +47,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     public <T> T getExtension(Class<T> type, String name) {
         for (ExtensionFactory factory : factories) {
             T extension = factory.getExtension(type, name);
+            // 匹配到一个符合条件的就返回
             if (extension != null) {
                 return extension;
             }
